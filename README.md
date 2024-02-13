@@ -63,3 +63,15 @@ K. Taira and T. Colonius. The immersed boundary method: A projection approach. J
 
 <a id="3">[3]</a>
 T. Colonius and K. Taira. A fast immersed boundary method using a nullspace approach and multi-domain far-field boundary conditions. Comp. Meth. Appl. Mech. Eng., 197(25-28):2131–46, 2008.
+
+### Citation
+Please cite this work if used
+
+@misc{woodward2023morizwanzig,
+      title={Mori-Zwanzig Modal Decomposition}, 
+      author={Michael Woodward and Yifeng Tian and Yen Ting Lin and Christoph Hader and Hermann Fasel and Daniel Livescu},
+      year={2023},
+      eprint={2311.09524},
+      archivePrefix={arXiv},
+      primaryClass={physics.flu-dyn}
+}
