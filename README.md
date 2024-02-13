@@ -1,7 +1,6 @@
 # Mori-Zwanzig Modal Decomposition (MZMD)
 
-[![Build Status](https://github.com/mwoodward-LANL/MZMD.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://gith\
-ub.com/mwoodward-LANL/MZMD.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://github.com/mwoodward-LANL/MZMD.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/mwoodward-LANL/MZMD.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 This repository contains the source codes for the manuscript "Mori-Zwanzig Modal Decomposition". The source codes were reviewed and approved with a LANL O-number O4678.
 
