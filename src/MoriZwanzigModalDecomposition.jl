@@ -1,4 +1,4 @@
-module MZMD
+module MoriZwanzigModalDecomposition
 using Plots, LaTeXStrings, LinearAlgebra, NPZ
 using Statistics, Measures
 

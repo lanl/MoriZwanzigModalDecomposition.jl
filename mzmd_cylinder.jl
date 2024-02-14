@@ -1,4 +1,4 @@
-using MZMD
+using MoriZwanzigModalDecomposition
 using Plots, LaTeXStrings, LinearAlgebra, NPZ
 using Statistics, Measures
 
