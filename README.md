@@ -17,13 +17,16 @@ The Julia programming languange (https://julialang.org/) was designed for high p
 
 
 Within the julia REPL (which can be accessed by typing "julia" in the command line), download this package via
->] add MZMD
+>] add MoriZwanzigModalDecomposition
 
 or with
-> import Pkg; Pkg.add("MZMD")
+> import Pkg; Pkg.add("MoriZwanzigModalDecomposition")
 
 
 ### Basic usage: 2D flow over a cyclinder  at $Re = 200$
+First, the data of states or measurements $\bm x_i \in \mathbb{R}^m$ must be arranged into the snapshot matrix:
+$$ \bm X = [\bm x_1, ..., \bm x_n] \in \mathbb{R}^{m\times n}$$
+
 Here we use a vorticity data-set of a 2D flow over a cyclinder in order to demonstrate the basic usage of MZMD for modal analysis and reduced order modeling. This data-set was generated from the open source immersed boundary method https://github.com/cwrowley/ibpm/ of Taira and Colonius [[2]](#2), [[3]](#3).
 
 The figures below show an application of the MZMD method for the flow over a 2D cylinder at $Re=200$:
