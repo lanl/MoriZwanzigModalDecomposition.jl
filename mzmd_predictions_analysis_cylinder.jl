@@ -43,10 +43,10 @@ X_test = X[:,T_test];
 #-------- Set params
 #number of memory terms:
 # n_ks = 12
-n_ks = 10;
+n_ks = 5;
 #number of snapshots used in fitting
 t_win = size(T_train, 1) - n_ks - 1;
-r = 7;
+r = 12;
 
 
 #-------- Compute MZ on POD basis observables
