@@ -56,8 +56,6 @@ X0 = X_train[:, 1];
 #compute svd based observables (X_proj: states projected onto pod modes)
 #method of snapshot more efficient for tall skinny X
 S, Ur, X_proj = svd_method_of_snapshots(X_train, r, subtractmean=true)
-plt = plot_energy_content(S,r)
-display(plt)
 
 #initial condtions with memory for obtaining predictions
 X0r = X_proj[:, 1:n_ks];
@@ -171,7 +169,6 @@ function plot_amplitude_vs_frequency_select_amps_mzmd(lam, a, dt, method)
 end
 
 plt = plot_amplitude_vs_frequency_select_amps_mzmd(Λc, amp, dt, "mzmd")
-
 
 a_norm = abs.(amp)/maximum(abs.(amp));
 # println("a_norm dominant = ", a_norm[1])

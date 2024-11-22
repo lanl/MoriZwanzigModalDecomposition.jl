@@ -14,37 +14,34 @@ include("./plot_functions.jl")
 include("./src/mzmd_modes.jl")
 
 
-re_num = 600;
-# re_num = 200;
+re_num = 200;
 method="companion"
 a_method = "x0"
-sample = parse(Int, ARGS[1]);
+# sample = parse(Int, ARGS[1]);
+sample = 20;
 println("  Sample = ", sample)
 println("running e.method $(method) and amp.method $(a_method) eigendecomp computing errors over r, k, d")
 
 
 #--------- Load data
-t_skip = 2;
-nmodes_ = 6;
+t_skip = 1;
+#number of dominant modes to use in prediction
+# nmodes_ = 1000;
+nmodes_="all";
 dt = t_skip*0.2;
-if re_num==600
-    # vort_path = "/Users/l352947/mori_zwanzig/mori_zwanzig/mzmd_code_release/data/vort_all_re600_t5100.npy"
-    vort_path = "/Users/l352947/mori_zwanzig/modal_analysis_mzmd/mori_zwanzig/mzmd_code_release/data/vort_all_re600_t5100.npy"
-    X = npzread(vort_path)[:, 300:5100];
-else
-    vort_path = "/Users/l352947/mori_zwanzig/cylinder_mzmd_analysis/data/vort_all_re200.npy";
-    X = npzread(vort_path)[:, 200:end] #T=1500
-end
+vort_path = "../data/vort_all_re200_t145.npy"
+X = npzread(vort_path) #T=1500
+
 
 X_mean = mean(X, dims=2);
 X = X .- X_mean;
 #check robustness to noise
 m = size(X,1);
 
-# t_end = 3000 #total n steps is 751
-# t_pred = 220
-t_end = 200 #total n steps is 751
-t_pred = 100
+#training time
+t_end = 120 #total n steps is 751
+#prediction time
+t_pred = 20
 
 T_train = ((1):(t_end+1-1))[1:t_skip:end];
 T_test = ((t_end+sample):(t_end + t_pred + sample))[1:t_skip:end];
@@ -52,7 +49,7 @@ time_train = dt * T_train
 time_test = dt * t_skip * T_test;
 t_all = 0:dt:(dt*(t_end + t_pred +1));
 X_train = X[:,T_train];
-X_train = X_train .+ 0.15*maximum(X_train) .* randn(size(X_train))
+# X_train = X_train .+ 0.15*maximum(X_train) .* randn(size(X_train))
 X_test = X[:,T_test];
 
 t_end = round(Int, t_end/t_skip);
@@ -70,28 +67,6 @@ function mzmd_modes_reduced_amps_for_errors(twin, X, r, n_ks)
     end
     Ur = U[:, 1:r];
     X_proj = Ur' * X[:, T_train];
-    # if n_ks==1 #hodmd (i.e. no mz memory)
-    #     # #TODO SVD 2
-    #     t_g = twin + n_ks + 1;
-    #     t_gtilde = length(1:(1+t_g - 1));
-    #     G_tilde=zeros(r, t_gtilde);
-    #     for i in 1:1
-    #         G_tilde[(i-1)*r+1:i*r,:] = X_proj[:,i:(i+t_g-1)];
-    #     end
-    #     U1, Sigma1, T1 = svd(G_tilde); 
-    #     sigmas1=diagm(Sigma1); 
-    #     U1=U1[:,1:r];
-    #     #svd low rank approximation of G_tilde:
-    #     hatG=sigmas1[1:r,1:r]*T1[:,1:r]';
-    #     # #TODO SVD 3
-    #     K1 = size(hatG, 2);
-    #     tildeU1, tildeSigma, tildeV1 = svd(hatG[:,1:K1-1]);
-    #     tildesigmas = diagm(tildeSigma)
-    #     Ω_tilde=hatG[:,2:K1]*tildeV1*inv(tildesigmas)*tildeU1';
-    #     Λc, Vc = eigen(Ω_tilde);
-    #     Vc=U1*Vc;
-    #     a, Vc = compute_amplitudes_given_ic_z0_hodmd(Ur, X_test[:, 1], Vc, 1, r)
-    # else
         Ω = obtain_mz_operators_(X_proj, twin, n_ks);
         C = form_companion(Ω, r, n_ks);
         Λc, Vc = eigen(C);
@@ -158,7 +133,11 @@ function compute_error_r_nk(nk_range, nd_range, r_range, nk_end)
                 t_win = size(T_train, 1) - k - 1;
                 # lam, Q, a, Ur = compute_modes_amplitudes_time_delay_observables(X, r, k, d, t_win, method);
                 lam, a, Q, Ur = mzmd_modes_reduced_amps_for_errors(t_win, X, r, k)
-                num_modes = minimum([k*r, nmodes_]);
+                if nmodes_=="all"
+                    num_modes = k*r;
+                else
+                    num_modes = minimum([k*r, nmodes_]);
+                end
                 a_dom, Vc_dom, lam_dom = select_dominant_modes(a, Ur, Q, r, k, lam, num_modes) #dominant three modes
                     solution_modes = simulate_modes_time_delay(Ur, Vc_dom, a_dom, r, lam_dom, dt, time_test)
                     for t in 1:(t_pred-nk_end)
@@ -177,8 +156,8 @@ function compute_error_r_nk(nk_range, nd_range, r_range, nk_end)
 end
 
 # r_range = cat(3:2:9);
-r_range = 3:2:9;
-nk_range = cat(1:2, 4:2:24, dims=1)
+r_range = 10:50:1000;
+nk_range = 1:12
 nd_range = [1];
 nk_end = nk_range[end];
 
@@ -202,8 +181,7 @@ function make_directory(path::String)
     end
 end
 
-# dir_path = "noise_dom_modes_gen_error_x0_test_dt$(t_skip)_te$(t_end)_re$(re_num)_nm$(nmodes_)"
-dir_path = "noise_dom_modes_gen_error_x0_test_dt$(t_skip)_te$(t_end)_re$(re_num)_nm$(nmodes_)"
+dir_path = "dom_modes_gen_error_x0_test_dt$(t_skip)_te$(t_end)_re$(re_num)_nm$(nmodes_)"
 make_directory(dir_path)
 
 npzwrite("$(dir_path)/cyl_ax0_err_mzmd_delay_k1dmd_dts$(t_skip)_st$(sample)_$(method)_$(a_method)_re$(re_num)_modes_nr$(nr)_nk$(nk)_tp$(t_pred_length)_te$(t_end)_nke$(nk_end)_nde$(nd_end).npy", err_mzmd)
