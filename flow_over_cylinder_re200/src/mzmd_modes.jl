@@ -39,6 +39,23 @@ function form_companion(Ω, r, n_ks)
     return C
 end
 
+function form_companion_memory_only(Ω, r, n_ks)
+    #form block companion matrix
+    C_r1 = zeros(r, n_ks*r) #row 1 of C
+    for i in 2:n_ks
+        C_r1[:, ((i-1)*r+1):i*r] = Ω[i,:,:]
+    end
+    if n_ks > 1
+        eye = I((n_ks)*r) .+ zeros((n_ks)*r,(n_ks)*r)
+        eye_sub = eye[1:((n_ks-1)*r), 1:((n_ks)*r)]
+    end
+    if n_ks > 1
+        C = vcat(C_r1, eye_sub)
+    else 
+        C = C_r1
+    end
+    return C
+end
 
 function mzmd_modes(C, X0)
     #compute modes and amplitudes from C
@@ -56,7 +73,7 @@ function mzmd_modes(C, X0)
     return Λc[ind], Φ_mz[:, ind], a[ind], amp[ind]
 end
 
-function mzmd_modes_reduced_amps(X, C, Ur, r, n_ks)
+function mzmd_modes_reduced_amps(C, Ur, r, n_ks)
     #compute modes and amplitudes from C
     Λc, Vc = eigen(C);
     #mzmd modes:
@@ -68,7 +85,7 @@ function mzmd_modes_reduced_amps(X, C, Ur, r, n_ks)
     z0 = zeros(n_ks*r)
     for k in 1:n_ks
         # z0[((k-1)*r+1):k*r] = Z0[:,k]
-        z0[((k-1)*r+1):k*r] = Z0[:,(n_ks - k + 1)];
+        z0[((k-1)*r+1):k*r] = Z0[:,(n_ks - k + 1)]
     end
     a = pinv(Vc)*z0;
     amp = zeros(r*n_ks);
@@ -77,11 +94,12 @@ function mzmd_modes_reduced_amps(X, C, Ur, r, n_ks)
     end
     #sort according to largest amplitude:
     ind = sortperm(abs.(amp), rev=true)
-    return Λc[ind], Φ_mz[:, ind], a[ind], amp[ind]
+    return Λc[ind], Φ_mz[:, ind], a[ind], amp[ind], Vc
 end
 
 
-function mzmd_modes_full_amps(X, C)
+
+function mzmd_modes_full_amps(C)
     #NOTE this is more computationally expensive than
     #mzmd_modes_reduced_amps and they are equaivlent.
 

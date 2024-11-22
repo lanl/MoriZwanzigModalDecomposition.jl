@@ -56,6 +56,7 @@ X0 = X_train[:, 1];
 #compute svd based observables (X_proj: states projected onto pod modes)
 #method of snapshot more efficient for tall skinny X
 S, Ur, X_proj = svd_method_of_snapshots(X_train, r, subtractmean=true)
+plot_energy_content(S,r,t_win, 0.99)
 
 #initial condtions with memory for obtaining predictions
 X0r = X_proj[:, 1:n_ks];
