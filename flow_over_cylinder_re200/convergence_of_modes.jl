@@ -22,19 +22,14 @@ println("running e.method $(method) and amp.method $(a_method) eigendecomp compu
 
 
 #--------- Load data
-t_skip = 2;
+t_skip = 1;
 dt = t_skip*0.2;
-if re_num==600
-    vort_path = "/Users/l352947/mori_zwanzig/modal_analysis_mzmd/mori_zwanzig/mzmd_code_release/data/vort_all_re600_t5100.npy"
-    # vort_path = "/Users/l352947/mori_zwanzig/mori_zwanzig/mzmd_code_release/data/vort_all_re600_t5100.npy"
-    X = npzread(vort_path)[:, 300:5000];
-else
-    vort_path = "/Users/l352947/mori_zwanzig/cylinder_mzmd_analysis/data/vort_all_re200.npy";
-    X = npzread(vort_path) #T=1500
-end
+vort_path = "../data/vort_all_re200_t145.npy"
+X = npzread(vort_path) #T=1500
+
+
 X_mean = mean(X, dims=2);
 X = X .- X_mean;
-# X = X .+ 0.2*maximum(X) * randn(size(X))
 
 
 m = size(X, 1);
@@ -55,8 +50,6 @@ t_win = size(T_train, 1) - n_ks - 1;
 r = 20;
 # num_modes = r*n_ks; #all
 num_modes = 6;
-
-
 
 #-------- Compute MZ on POD basis observables
 X1 = X_train[:, 1:t_win]; #Used to obtain Ur on 1:twin

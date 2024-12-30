@@ -35,6 +35,27 @@ function svd_method_of_snapshots(X, r; subtractmean::Bool = false)
     return S, U_r, U_r' * X
 end
 
+function svd_method_of_snapshots_U_large_r(X, r; subtractmean::Bool = false)
+    if subtractmean X .-= mean(X,dims=2); end
+    #number of snapshots
+    m = size(X, 2);
+    #Correlation matrix
+    C = X'*X;
+    #Eigen decomp
+    E = eigen!(C);
+    e_vals = E.values;
+    e_vecs = E.vectors;
+    #sort eigenvectors
+    sort_ind = sortperm(abs.(e_vals)/m, rev=true)
+    e_vecs = e_vecs[:,sort_ind];
+    e_vals = e_vals[sort_ind];
+    #singular values
+    S = sqrt.(abs.(e_vals));
+    #modes and coefficients
+    U_r = X*e_vecs*Diagonal(1 ./S)[:, 1:r]
+    # a = Diagonal(S)*e_vecs'
+    return U_r
+end
 
 
 
@@ -124,6 +145,13 @@ function sum_term_pred(X, Ω, k, n_ks)
 end
 
 
+function sum_term_pred_dmd(X, A, k, n_ks)
+    ty = typeof(X[1,1]);
+    S = zeros(ty, size(X[:,1])[1]);
+    S += A * X[:, k ];
+    return S
+end
+
 function obtain_prediction(X, Ω, n_ks)
     ty = typeof(X[1,1]);
     X_pred = zeros(ty, size(X)[1], size(X)[2])
@@ -142,6 +170,18 @@ function obtain_future_state_prediction(Ur, X1_gen, Ω, n_ks, T_pred)
     X_pred[:, 1:(n_ks)] = X1_gen[:, 1:(n_ks)];
     for k in (n_ks) : (T_pred + n_ks - 1)
         X_pred[:, k+1] = sum_term_pred(X_pred, Ω, k, n_ks)
+    end
+    # return X_pred[:, (n_ks):end]
+    return X_pred
+end
+
+function obtain_future_state_prediction_dmd(Ur, X1_gen, Ω, n_ks, T_pred)
+    ty = typeof(X1_gen[1,1]);
+    X_pred = zeros(ty, size(X1_gen)[1], T_pred+n_ks)
+    #initial condition including history:
+    X_pred[:, 1:(n_ks)] = X1_gen[:, 1:(n_ks)];
+    for k in (n_ks) : (T_pred + n_ks - 1)
+        X_pred[:, k+1] = sum_term_pred_dmd(X_pred, Ω, k, n_ks)
     end
     # return X_pred[:, (n_ks):end]
     return X_pred
