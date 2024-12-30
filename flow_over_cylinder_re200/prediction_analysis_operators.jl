@@ -2,6 +2,9 @@ using Plots, LaTeXStrings, LinearAlgebra, NPZ
 using Statistics
 using StatsBase
 
+" This file uses the learned MZ opertors to make prediction (with all modes)
+and compares MZMD and DMD pdfs of long time predictions with the test set"
+
 #--------- Include files
 include("plot_functions.jl")
 include("./src/compute_obervability_amplitudes_optimized.jl")
