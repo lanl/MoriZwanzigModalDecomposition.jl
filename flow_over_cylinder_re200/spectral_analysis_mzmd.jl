@@ -78,6 +78,35 @@ display(plt)
 C = form_companion(Ω, r, n_ks);
 
 
+function plot_c_spectrum_sort(Λc)
+    gr(size=(570,570), xtickfontsize=12, ytickfontsize=12, xguidefontsize=20, yguidefontsize=14, legendfontsize=12,
+        dpi=300, grid=(:y, :gray, :solid, 1, 0.4), palette=cgrad(:plasma, 3, categorical = true));
+    function circle_shape(h,k,r)
+        θ=LinRange(0,2*pi,500);
+        return h .+ r*sin.(θ), k .+ r*cos.(θ)
+    end
+    
+    plt = scatter(Λc[1:r], linewidth=2.0, ms = 4, color = "blue", legend=false, markerstrokewidth=0, grid = true, framestyle = :box)
+    scatter!(Λc[(1+r):2r], linewidth=2.0, ms = 4, color = "cyan1", legend=false, markerstrokewidth=0, grid = true, framestyle = :box)
+    scatter!(Λc[(1+2r):end], linewidth=2.0, ms = 2, color = "cyan4", legend=false, grid = true, markerstrokewidth=0, framestyle = :box)
+    scatter!([Λc[1]], ms = 6.0, color="deepskyblue3", markershape=:hexagon, label=L"f: \textrm{Fundamental}")
+    scatter!([Λc[3]], ms = 7.0, color="green", markershape=:circle, label=L"1^{st} \textrm{Harmonic}")
+    scatter!([Λc[5]], ms = 6.0, color="gold4", markershape=:square, label=L"2^{nd} \textrm{Harmonic}")
+    scatter!([Λc[r+1]], ms = 9.0, color="orange", markershape=:star, markerstrokewidth=0, label=L"\textrm{Dominant ~ memory ~ mode}")
+    scatter!(Λc[(2+r):2r], linewidth=2.0, ms = 4, color = "brown", legend=false, markerstrokewidth=0, grid = true, framestyle = :box)
+    scatter!(Λc[(1+2r):end], linewidth=2.0, ms = 2, color = "cyan4", legend=false, grid = true, markerstrokewidth=0, framestyle = :box)
+    plot!(circle_shape(0,0,1.0), linewidth=1.5, color="black", linestyle=:dash)
+    if n_ks>1
+        title!(L"\textrm{MZMD ~ Eigenvalues }", titlefont=16)
+    else
+        title!(L"\textrm{DMD ~ Eigenvalues }", titlefont=16)
+    end
+    xlabel!(L"\textrm{Re}(\lambda)", xtickfontsize=10, xguidefontsize=14)
+    ylabel!(L"\textrm{Im}(\lambda)", ytickfontsize=10, yguidefontsize=14)
+    return plt
+end
+
+
 function plot_c_spectrum2(Λc)
     gr(size=(570,570), xtickfontsize=12, ytickfontsize=12, xguidefontsize=20, yguidefontsize=14, legendfontsize=12,
         dpi=300, grid=(:y, :gray, :solid, 1, 0.4), palette=cgrad(:plasma, 3, categorical = true));
@@ -130,9 +159,11 @@ end
 
 Λc, Φ_mz, a, amp = mzmd_modes_reduced_amps_compute(C, Ur, r, n_ks) #fast and accurate algorithm
 
-plt = plot_c_spectrum2(Λc)
-display(plt)
+# plt = plot_c_spectrum2(Λc)
+# display(plt)
 
+plt = plot_c_spectrum_sort(Λc)
+display(plt)
 
 function plot_amplitude_vs_frequency_select_amps_mzmd(lam, a, dt, method)
     gr(size=(570,450), xtickfontsize=12, ytickfontsize=12, xguidefontsize=20, yguidefontsize=14, legendfontsize=12,
@@ -168,7 +199,66 @@ function plot_amplitude_vs_frequency_select_amps_mzmd(lam, a, dt, method)
     return plt
 end
 
-plt = plot_amplitude_vs_frequency_select_amps_mzmd(Λc, amp, dt, "mzmd")
+
+function amp_log(lam, a, dt, method, ylim_)
+    gr(size=(570,450), xtickfontsize=12, ytickfontsize=12, xguidefontsize=20, yguidefontsize=14, legendfontsize=12,
+    dpi=300, grid=(:y, :gray, :solid, 1, 0.4), palette=cgrad(:plasma, 3, categorical = true));
+    r_2 = floor(Int, r/2);
+    freqs = (imag.(log.(lam))/(2*pi*dt))
+    max_a = maximum(abs.(a))
+    println("prim instability freq = ", abs.(real(freqs))[1])
+    freqs1 = freqs[1:r]; a1 = a[1:r];
+    prim_inst_indx = 1; secd_inst_indx = 3; thrd_inst_indx = 5;
+    if n_ks>1
+        plt = plot([abs.(real(freqs))[prim_inst_indx], abs.(real(freqs))[prim_inst_indx]], [ylim_, (abs.(a)/max_a)[prim_inst_indx]], 
+                    lw=2, color="blue", xlims=(0, 1.3), yaxis=:log, label=L"\textrm{MZMD}(1 \leq i \leq r)")
+    else
+        plt = plot([abs.(real(freqs))[prim_inst_indx], abs.(real(freqs))[prim_inst_indx]], [ylim_, (abs.(a)/max_a)[prim_inst_indx]], 
+                    lw=2, color="blue", xlims=(0, 1.3), yaxis=:log, label=L"\textrm{DMD}")
+    end
+    if n_ks>1
+        a1 = a[1:r]; a2 = a[(r+1):2r]; a3_ = a[(2r+1):end]; 
+        lam_1 = lam[1:r]; lam_2 = lam[(r+1):2r]; lam_3 = lam[(2r+1):3r];
+        freqs1 = freqs[1:r]; freqs2 = freqs[(r+1):2r]; freqs3_ = freqs[(2r+1):end];
+        for i in 2:length(real(freqs2))
+            plot!([abs.(real(freqs2))[i], abs.(real(freqs2))[i]], [ylim_, (abs.(a2)/max_a)[i]], lw=2, 
+                        color="brown", yscale=:log10, ylims=(1e-4, 1.25), minorgrid=true, label="")
+        end
+        for i in 2:length(real(freqs3_))
+            plot!([abs.(real(freqs3_))[i], abs.(real(freqs3_))[i]], [ylim_, (abs.(a3_)/max_a)[i]], lw=1, 
+                        color="cyan4", yscale=:log10, ylims=(1e-4, 1.5), minorgrid=true, label="")
+        end
+        plot!([abs.(real(freqs2))[1], abs.(real(freqs2))[1]], [ylim_, (abs.(a2)/max_a)[1]], lw=2, 
+                        color="brown", yscale=:log10, ylims=(1e-4, 1.25), minorgrid=true, label=L"\textrm{MZMD}(r+1 \leq i \leq 2r)")
+        plot!([abs.(real(freqs3_))[1], abs.(real(freqs3_))[1]], [ylim_, (abs.(a3_)/max_a)[1]], lw=1, 
+                        color="cyan4", yscale=:log10, ylims=(1e-4, 1.5), minorgrid=true, legendfontsize=11, label=L"\textrm{MZMD}(2r+1 \leq i \leq kr)")
+        title!(L"\textrm{Amplitude ~ vs. ~ frequency ~ MZMD ~ }", titlefont=16)
+    else
+        title!(L"\textrm{Amplitude ~ vs. ~ frequency ~ DMD ~ }", titlefont=16)
+    end
+    scatter!([abs.(real(freqs))[prim_inst_indx]], [(abs.(a)/max_a)[prim_inst_indx]], ms = 6.0, color="deepskyblue3", markershape=:hexagon, label=L"f: \textrm{Fundamental}")
+    scatter!([abs.(real(freqs))[secd_inst_indx]], [(abs.(a)/max_a)[secd_inst_indx]], ms = 7.0, color="green", markershape=:circle, label=L"1^{st} \textrm{Harmonic}")
+    scatter!([abs.(real(freqs))[thrd_inst_indx]], [(abs.(a)/max_a)[thrd_inst_indx]], ms = 6.0, color="gold4", markershape=:square, label=L"2^{nd} \textrm{Harmonic}")
+
+    vline!([0.1967], lw=1, label=false, linestyle=:dash, color=:red, legend=true)
+    vline!([2*0.1967], lw=1, label=false, linestyle=:dash, color=:red, legend=true)
+    vline!([3*0.1967], lw=1, label=L"\textrm{DNS ~ harmonics}", linestyle=:dash, color=:red, legend=true)
+    # Add vertical lines from each point to the x-axis
+    for i in 1:length(real(freqs1))
+        plot!([abs.(real(freqs1))[i], abs.(real(freqs1))[i]], [ylim_, (abs.(a1)/max_a)[i]], lw=2, color="blue", yscale=:log10, ylims=(1e-4, 1.5), minorgrid=true, label="")
+    end
+    scatter!([abs.(real(freqs))[r+1]], [(abs.(a)/max_a)[r+1]], ms = 9.0, color="orange", markershape=:star, markerstrokewidth=0, label=L"\textrm{Dominant ~ memory ~ mode}")
+
+    xlabel!(L"\textrm{Frequency ~ (kHz)}", xtickfontsize=10, xguidefontsize=14)
+    ylabel!(L"\textrm{Normalized ~ Amplitude}", ytickfontsize=10, yguidefontsize=14)
+    display(plt)
+    # savefig(plt, "./figures/$(method)_log_spectrum_vs_ampr$(r)_k$(n_ks)_tend$(t_end)_re$(re_num).png")
+    return plt
+end
+plt = amp_log(Λc, amp, dt, "mzmd", 5e-7)
+display(plt)
+
+# plt = plot_amplitude_vs_frequency_select_amps_mzmd(Λc, amp, dt, "mzmd")
 
 a_norm = abs.(amp)/maximum(abs.(amp));
 # println("a_norm dominant = ", a_norm[1])
