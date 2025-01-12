@@ -209,7 +209,7 @@ function amp_log(lam, a, dt, method, ylim_)
     println("prim instability freq = ", abs.(real(freqs))[1])
     freqs1 = freqs[1:r]; a1 = a[1:r];
     prim_inst_indx = 1; secd_inst_indx = 3; thrd_inst_indx = 5;
-    if n_ks>1
+    if n_ks>1spe
         plt = plot([abs.(real(freqs))[prim_inst_indx], abs.(real(freqs))[prim_inst_indx]], [ylim_, (abs.(a)/max_a)[prim_inst_indx]], 
                     lw=2, color="blue", xlims=(0, 1.3), yaxis=:log, label=L"\textrm{MZMD}(1 \leq i \leq r)")
     else
