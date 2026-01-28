@@ -1,9 +1,16 @@
-using MoriZwanzigModalDecomposition
+# using MoriZwanzigModalDecomposition
 using Plots, LaTeXStrings, LinearAlgebra, NPZ
 using Statistics, Measures
 
 #This file demonstrates the MZMD approach on the flow over a cyclinder
     # - Extracts and plots mzmd modes, decaying memory effects, and pointwise errors
+
+    
+#--------- Include files
+include("./src/plot_functions.jl")
+include("./src/compute_obervability_amplitudes_optimized.jl")
+include("./src/main_mz_algorithm.jl")
+include("./src/mzmd_modes.jl")
 
 
 #--------- Load data

@@ -15,12 +15,12 @@ MZMD represents a generalization of the DMD algorithm [[1]](#1) by including MZ 
 ### Installation
 The Julia programming languange (https://julialang.org/) was designed for high performance scientific computing. The instructions for downloading Julia can be found in https://julialang.org/downloads/. Once Julia is installed, this package can be downloaded as follows. You can run julia in command line (REPL), or in vscode (which is a convient to use IDE) as described in https://code.visualstudio.com/docs/languages/julia
 
-
-Within the julia REPL (which can be accessed by typing "julia" in the command line), download this package via
+To run the code, start with running mzmd_cylinder.jl, which produces several figures to compare DMD with MZMD.
+<!-- Within the julia REPL (which can be accessed by typing "julia" in the command line), download this package via
 >] add MoriZwanzigModalDecomposition
 
 or with
-> import Pkg; Pkg.add("MoriZwanzigModalDecomposition")
+> import Pkg; Pkg.add("MoriZwanzigModalDecomposition") -->
 
 
 ### Basic usage: 2D flow over a cyclinder  at $Re = 200$
